@@ -1,0 +1,4 @@
+.idea/
+index/__pycache__/
+index/migrations/__pycache__/
+my_portfolio/__pycache__/
