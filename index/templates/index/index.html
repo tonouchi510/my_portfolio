@@ -57,11 +57,11 @@
         <small>in school days</small>
       </h1>
 
-      <!-- Project One -->
+      <!-- Project List -->
       {% for artifact in artifacts_list %}
       <div class="row">
         <div class="col-md-7">
-          <a class="project-link" href="{{ artifact.path }}">
+          <a class="project-link" href="{% url artifact.path %}">
             <!-- <img class="img-fluid rounded mb-3 mb-md-0" src="http://placehold.it/700x300" alt=""> -->
             <img class="img-fluid rounded mb-3 mb-md-0" src="{% static artifact.image %}" alt="{{ artifact.title }}">
           </a>
@@ -69,7 +69,7 @@
         <div class="col-md-5">
           <h3>Project - {{ artifact.title }}</h3>
           <p>{{ artifact.description }}</p>
-          <a class="btn btn-primary" href="{{ artifact.path }}">View Project</a>
+          <a class="btn btn-primary" href="{% url artifact.path %}">View Project</a>
         </div>
       </div>
       <!-- /.row -->

@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+APPEND_SLASH = True
 
 # Application definition
 
@@ -37,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'index.apps.IndexConfig'
+    'index.apps.IndexConfig',
+    'myapps.mnist.apps.MnistConfig'
 ]
 
 MIDDLEWARE = [
