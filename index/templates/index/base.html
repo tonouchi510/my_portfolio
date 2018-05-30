@@ -24,25 +24,25 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
       <div class="container">
-        <a class="navbar-brand" href="?page=1">My Portfolio</a>
+        <a class="navbar-brand" href="{% url 'index:index' %}?page=1">My Portfolio</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="?page=1">Home
+              <a class="nav-link" href="{% url 'index:index' %}?page=1">Home
                 <span class="sr-only">(current)</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="ComingSoon">About</a>
+              <a class="nav-link" href="{% url 'index:ComingSoon' %}">About</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="ComingSoon">Services</a>
+              <a class="nav-link" href="{% url 'index:ComingSoon' %}">Services</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="ComingSoon">Contact</a>
+              <a class="nav-link" href="{% url 'index:ComingSoon' %}">Contact</a>
             </li>
           </ul>
         </div>
