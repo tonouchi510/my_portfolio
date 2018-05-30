@@ -5,4 +5,5 @@ from . import views
 app_name = 'mnist'
 urlpatterns = [
     path('', views.MainView.as_view(), name='mnist'),
+    path('peint.html', views.peint, name='peint')
 ]
