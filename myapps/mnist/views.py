@@ -10,5 +10,5 @@ class MainView(generic.ListView):
     context_object_name = 'digit_list'
 
 
-def peint(request):
-    return render(request, 'mnist/peint.html', {})
+def detail(request):
+    return render(request, 'mnist/detail.html', {})
