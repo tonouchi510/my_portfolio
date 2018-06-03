@@ -1,5 +1,6 @@
 {% extends 'index/base.html' %}
 {% load static %}
+{% load mnist_extras %}
 
 {% block title %}My Portfolio - Digit Recognizer{% endblock %}
 
@@ -7,6 +8,8 @@
 {% block date %}- 2018/05/30{% endblock %}
 
 {% block head %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
     <script>
         var can;
         var ct;
@@ -23,7 +26,7 @@
             can.addEventListener("mouseup",onMouseUp,false);
             ct=can.getContext("2d");
             ct.strokeStyle="#ffffff";
-            ct.lineWidth=7;
+            ct.lineWidth=15;
             ct.lineJoin="round";
             ct.lineCap="round";
             clearCan();
@@ -77,6 +80,55 @@
             ct.fillStyle="rgb(0,0,0)";
             ct.fillRect(0,0,can.getBoundingClientRect().width,can.getBoundingClientRect().height);
         }
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        var csrftoken = getCookie('csrftoken');
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+        function funcBtn() {
+            var canvas = document.getElementById('can');
+            var base64 = canvas.toDataURL('image/png');
+            var fdata = new FormData(document.getElementById('myform'));
+            fdata.append('image_data', base64);
+
+            $.ajax({
+                url:'{% url "mnist:mnist" %}',
+                type:'POST',
+                data:fdata,
+                dataType:'json',
+                contentType: false,
+                processData: false,
+                success:function(response){
+                    $('#result').html('<h5>モデルの予測結果：'+response.pred_can+'</h5>');
+                },
+                error: function(response) {
+                    $('#result').html('<h4>error</h4>');
+                },
+            });
+        }
     </script>
 {% endblock %}
 
@@ -92,21 +144,12 @@
             <div style="border:solid 1px #000000;width:280px;height:280px;" id="candiv">
                 <canvas id="can" width="280px" height="280px"></canvas>
             </div>
-            <form method="post" action="">
-            <input type="button" onClick="clearCan();" value="クリア" data-inline="true" />
-            <select name="label" style="margin-left: 100px; width: 50px; height: 30px;">
-                <option value="0">0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-            </select>
-            <input type="submit" value="登録">
+            <div id="result"><h5>モデルの予測結果：</h5></div>
+            <form method="post" action="" id="myform" name="myform" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="button" onClick="clearCan();" value="クリア" data-inline="true" style="margin-right: 50px" />
+                正解：{{ form.label }}
+                <input type="submit" value="登録" onclick="funcBtn(); return false;"/>
             </form>
         </div>
 
@@ -115,13 +158,13 @@
         <!-- example -->
         <h2>Prediction examples</h2>
         <div class="row">
-            {% for image in digit_list %}
-            <div class="col-lg-3 col-sm-6 portfolio-item">
-                <img class="card-img-top" src="{% static image.path %}" alt="{{ image.label }}">
-                <h4>
-                    <a>予測：{{ image.label }}　-　正解：{{ image.label }}</a>
-                </h4>
-            </div>
+            {% for image in digit_list|slice:":4" %}
+                <div class="col-lg-3 col-sm-6 portfolio-item">
+                    <img class="card-img-top" src="{% static image.path %}" alt="{{ image.label }}">
+                    <h4>
+                        <a>予測：{{ predict|get_by_index:forloop.counter }}　-　正解：{{ image.label }}</a>
+                    </h4>
+                </div>
             {% endfor %}
         </div>
         <!-- /.row -->
@@ -131,7 +174,7 @@
         <!-- Call to Action Section -->
         <div class="row mb-4">
             <div class="col-md-8">
-                <p>モデル構成，データセット，認識精度等のより詳細な情報が欲しい場合は，右のボタンを押してください。詳細ページに遷移します。</p>
+                <p>モデル構成，データセット，認識精度等のより詳細な情報を見たい場合は，右のボタンを押してください。詳細ページに遷移します。</p>
             </div>
             <div class="col-md-4">
                 <a class="btn btn-lg btn-secondary btn-block" href="{% url 'index:ComingSoon' %}">view the details</a>
