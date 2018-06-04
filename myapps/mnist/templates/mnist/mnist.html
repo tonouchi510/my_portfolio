@@ -1,0 +1,187 @@
+{% extends 'index/base.html' %}
+{% load static %}
+{% load mnist_extras %}
+
+{% block title %}My Portfolio - Digit Recognizer{% endblock %}
+
+{% block h1 %}Digit Recognizer{% endblock %}
+{% block date %}- 2018/05/30{% endblock %}
+
+{% block head %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+    <script>
+        var can;
+        var ct;
+        var ox=0,oy=0,x=0,y=0;
+        var mf=false;
+        function mam_draw_init(){
+            //初期設定
+            can=document.getElementById("can");
+            can.addEventListener("touchstart",onDown,false);
+            can.addEventListener("touchmove",onMove,false);
+            can.addEventListener("touchend",onUp,false);
+            can.addEventListener("mousedown",onMouseDown,false);
+            can.addEventListener("mousemove",onMouseMove,false);
+            can.addEventListener("mouseup",onMouseUp,false);
+            ct=can.getContext("2d");
+            ct.strokeStyle="#ffffff";
+            ct.lineWidth=15;
+            ct.lineJoin="round";
+            ct.lineCap="round";
+            clearCan();
+        }
+        function onDown(event){
+            mf=true;
+            ox=event.touches[0].pageX-event.target.getBoundingClientRect().left;
+            oy=event.touches[0].pageY-event.target.getBoundingClientRect().top;
+            event.stopPropagation();
+        }
+        function onMove(event){
+            if(mf){
+                x=event.touches[0].pageX-event.target.getBoundingClientRect().left;
+                y=event.touches[0].pageY-event.target.getBoundingClientRect().top;
+                drawLine();
+                ox=x;
+                oy=y;
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }
+        function onUp(event){
+            mf=false;
+            event.stopPropagation();
+        }
+
+        function onMouseDown(event){
+            ox=event.clientX-event.target.getBoundingClientRect().left;
+            oy=event.clientY-event.target.getBoundingClientRect().top ;
+            mf=true;
+        }
+        function onMouseMove(event){
+            if(mf){
+                x=event.clientX-event.target.getBoundingClientRect().left;
+                y=event.clientY-event.target.getBoundingClientRect().top ;
+                drawLine();
+                ox=x;
+                oy=y;
+            }
+        }
+        function onMouseUp(event){
+            mf=false;
+        }
+        function drawLine(){
+            ct.beginPath();
+            ct.moveTo(ox,oy);
+            ct.lineTo(x,y);
+            ct.stroke();
+        }
+        function clearCan(){
+            ct.fillStyle="rgb(0,0,0)";
+            ct.fillRect(0,0,can.getBoundingClientRect().width,can.getBoundingClientRect().height);
+        }
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        var csrftoken = getCookie('csrftoken');
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+        function funcBtn() {
+            var canvas = document.getElementById('can');
+            var base64 = canvas.toDataURL('image/png');
+            var fdata = new FormData(document.getElementById('myform'));
+            fdata.append('image_data', base64);
+
+            $.ajax({
+                url:'{% url "mnist:mnist" %}',
+                type:'POST',
+                data:fdata,
+                dataType:'json',
+                contentType: false,
+                processData: false,
+                success:function(response){
+                    $('#result').html('<h5>モデルの予測結果：'+response.pred_can+'</h5>');
+                },
+                error: function(response) {
+                    $('#result').html('<h5>モデルの予測結果：Error</h5>');
+                },
+            });
+        }
+    </script>
+{% endblock %}
+
+
+{% block body %}
+    <hr>
+    <!-- Page Content -->
+    <body onload="mam_draw_init();"></body>
+    <div class="container">
+        <div align="center">
+            <h3>手書き入力フォーム</h3>
+            <p>0～9の数字を書いてください</p>
+            <div style="border:solid 1px #000000;width:280px;height:280px;" id="candiv">
+                <canvas id="can" width="280px" height="280px"></canvas>
+            </div>
+            <div id="result"><h5>モデルの予測結果：</h5></div>
+            <form method="post" action="" id="myform" name="myform" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="button" onClick="clearCan();" value="クリア" data-inline="true" style="margin-right: 50px" />
+                正解：{{ form.label }}
+                <input type="submit" value="登録" onclick="funcBtn(); return false;"/>
+            </form>
+        </div>
+
+        <hr>
+
+        <!-- example -->
+        <h2>Prediction examples</h2>
+        <div class="row">
+            {% for image in digit_list|dictsortreversed:"data_id"|slice:":8" %}
+                <div class="col-lg-3 col-sm-6 portfolio-item">
+                    <img class="card-img-top" src="{% static image.path %}" alt="{{ image.label }}">
+                    <h4>
+                        <a>予測：{{ predict|get_by_index:forloop.counter }}　-　正解：{{ image.label }}</a>
+                    </h4>
+                </div>
+            {% endfor %}
+        </div>
+        <!-- /.row -->
+
+        <hr>
+
+        <!-- Call to Action Section -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <p>モデル構成，データセット，認識精度等のより詳細な情報を見たい場合は，右のボタンを押してください。詳細ページに遷移します。</p>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-lg btn-secondary btn-block" href="{% url 'mnist:detail' %}">view the details</a>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.container -->
+
+{% endblock %}
