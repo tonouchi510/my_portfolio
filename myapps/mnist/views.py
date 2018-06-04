@@ -4,15 +4,19 @@ from django.shortcuts import render
 from django.views.generic.edit import FormMixin
 from .forms import MNISTForm
 from django.http import JsonResponse
+from .digit_recognizer import digit_recognizer
 
 import os
 import re
 import base64
 from io import BytesIO
 from PIL import Image
+import tensorflow as tf
+
+graph = tf.get_default_graph()
+digit_recognizer = digit_recognizer()
 
 
-# Create your views here.
 class MainView(generic.ListView, FormMixin):
     model = MNIST
     template_name = 'mnist/mnist.html'
@@ -21,7 +25,13 @@ class MainView(generic.ListView, FormMixin):
 
     def get_context_data(self, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['predict'] = [1, 2, 3, 4]
+        exlist = self.model.objects.order_by('-data_id')[:8]
+        preds = []
+        global graph
+        with graph.as_default():
+            for data in exlist:
+                preds.append(digit_recognizer.predict(data.path))
+            context['predict'] = preds
 
         return context
 
@@ -40,10 +50,15 @@ class MainView(generic.ListView, FormMixin):
         form = self.form_class(data)
 
         if form.is_valid():
+            # データ登録
             save_image(request.POST['image_data'], new_path)
             obj = form.save(commit=True)
             obj.save()
-            return JsonResponse({'pred_can': 2})
+            # canvas数字の識別
+            global graph
+            with graph.as_default():
+                pred = digit_recognizer.predict(new_path)
+            return JsonResponse({'pred_can': str(pred)})
         return JsonResponse({'pred_can': 'error'})
 
 

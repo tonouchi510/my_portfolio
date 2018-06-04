@@ -10,7 +10,9 @@
 - view内で該当処理を記載
 
 ### canvasに書いた絵をサーバ側に画像として保存したい
-- formのsubmit時にPOSTデータを追加するスクリプトを書くことで対応した
+- canvasの保存について
+  - https://code.i-harness.com/ja/q/76a1de
+- ただし，formのsubmit時にPOSTデータを追加するスクリプトを書くことで対応した
   - http://raining.bear-life.com/javascript/javascript%E3%81%A7post%E3%81%AE%E5%80%A4%E3%82%92%E8%BF%BD%E5%8A%A0%E3%81%99%E3%82%8B
 
 ### canvasに書いた絵をサーバ側に画像として保存したい(その2)
@@ -19,3 +21,7 @@
   - https://teratail.com/questions/128895
   - https://qiita.com/zakiyamaaaaa/items/bdda422db2ccbaea60d9
 - これに関しても，templateのmnist.htmlで記載
+
+### djangoでDeepLearningライブラリを使うとエラーが出る
+- 以下のサイトの通りにすることで改善
+- https://qiita.com/itisyuu/items/7c9d7ff43b3936704918
