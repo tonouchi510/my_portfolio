@@ -11,10 +11,10 @@ Djangoを使ったWebアプリケーション作成の練習用リポジトリ
 - Tensorflow1.5.1
 
 ## スクリーンショット
-![インデックスページ](indexSC.png "index page")
+![インデックスページ](readme/indexSC.png "index page")
 ---------
 
-![MNISTページ](mnistSC.png "mnist page")
+![MNISTページ](readme/mnistSC.png "mnist page")
 
 ## 作品集
 とりあえず以下のものをwebアプリケーション化予定
